@@ -30,16 +30,23 @@ app.get("/api/hello", function (req, res) {
 });
 
 app.get('/api/:date?', (req, res) => {
-  let unixTime = 0;
-  let validDate = false;
-  let dateRegex = /[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])/;
-  if (dateRegex.test(req.params.date)) {
-    unixTime = Date.parse(req.params.date);
-    validDate = true;
+  let unixTime = new Date(req.params.date);
+  let utcTime;
+  if (unixTime != 'Invalid Date') {
+    unixTime = Date.parse(unixTime);
+    utcTime = new Date(unixTime);
+    res.json({
+      unix: unixTime,
+      utc: utcTime.toUTCString()
+    }); 
   }
-  if (/[0-9]{13}/.test(req.params.date)) {
+  else if (/[0-9]{13}/.test(req.params.date)) {
     unixTime = parseInt(req.params.date);
-    validDate = true;
+    utcTime = new Date(unixTime);
+    res.json({
+      unix: unixTime,
+      utc: utcTime.toUTCString()
+    }); 
   }
   if (!req.params.date) {
     let currentDate = new Date();
@@ -48,16 +55,8 @@ app.get('/api/:date?', (req, res) => {
       utc: currentDate.toUTCString()
     })
   }
-  if (!validDate) {
-    res.json({error: 'Invalid Date'});
-  }
   
-  let utcTime = new Date(unixTime);
-
-  res.json({
-    unix: unixTime,
-    utc: utcTime.toUTCString()
-  }); 
+  res.json({error: 'Invalid Date'});
 });
 
 
